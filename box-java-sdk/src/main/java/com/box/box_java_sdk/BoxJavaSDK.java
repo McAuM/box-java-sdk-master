@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,29 +21,22 @@ import com.box.sdk.Metadata;
 import com.box.sdk.ProgressListener;
 
 public final class BoxJavaSDK {
-    private static final String CLIENT_ID1 = "qs9oulna0fakkkxjorbvc0bpv8113423";
+    /*private static final String CLIENT_ID1 = "qs9oulna0fakkkxjorbvc0bpv8113423";
     private static final String CLIENT_SECRET1 = "tAtjbtmbkIp5n6vQsWBeX1SyOoYVq66M";
     private static final String CLIENT_ID2 = "awpbu85jgxxhfeybsqygf6qqxtn5dbs1";
-    private static final String CLIENT_SECRET2 = "VhTpmy4VMhCgyuhm302xYuIwxb6xMZML";  
+    private static final String CLIENT_SECRET2 = "VhTpmy4VMhCgyuhm302xYuIwxb6xMZML";*/  
     private static final int MAX_DEPTH = 2;
     private BoxJavaSDK() { }
     public static void main(String[] args) throws IOException {
     	String arg2 = args[1];
     	String arg1 = args[0];
-    	String ClientID = "";
-    	String ClientSecret = "";
-    	if(arg1.equals("1")){
-    		ClientID = CLIENT_ID1;
-    		ClientSecret = CLIENT_SECRET1;
-    	}
-    	else if (arg1.equals("2")){
-    		ClientID = CLIENT_ID2;
-    		ClientSecret = CLIENT_SECRET2;
-    	}
-    	String DEVELOPER_TOKEN = (String)Readfile("token.box"+arg1);
-    	String REFRESH_TOKEN = (String)Readfile("refreshtoken.box"+arg1);    	
-        Logger.getLogger("com.box.sdk").setLevel(Level.OFF); // Turn off logging to prevent polluting the output.
-        BoxAPIConnection api = new BoxAPIConnection(ClientID,ClientSecret,DEVELOPER_TOKEN.trim(),REFRESH_TOKEN.trim());                       
+    	int NoBox = Integer.parseInt(arg1);
+    	String ClientID = Readfilenumber("/home/hadoop/TESAPI/TESTSCRIPT/cliID.box",NoBox-1);
+    	String ClientSecret = Readfilenumber("/home/hadoop/TESAPI/TESTSCRIPT/cliSECRET.box",NoBox-1);    	
+    	String DEVELOPER_TOKEN = (String)Readfile("/home/hadoop/TESAPI/TESTSCRIPT/token.box"+arg1);
+    	String REFRESH_TOKEN = (String)Readfile("/home/hadoop/TESAPI/TESTSCRIPT/refreshtoken.box"+arg1);
+        Logger.getLogger("com.box.sdk").setLevel(Level.OFF); // Turn off logging to prevent polluting the output.        
+        BoxAPIConnection api = new BoxAPIConnection(ClientID.trim(),ClientSecret.trim(),DEVELOPER_TOKEN.trim(),REFRESH_TOKEN.trim());                       
         if(arg2.equals("help")){
         	HelpApi();
         }
@@ -123,6 +117,15 @@ public final class BoxJavaSDK {
     	       e.printStackTrace();
     	   }
     	   return content;
+    }
+    private static String Readfilenumber(String ChFile,int linenumber) throws IOException{    	
+    	String content = null;    
+    	FileInputStream fs= new FileInputStream(ChFile);
+    	BufferedReader br = new BufferedReader(new InputStreamReader(fs));
+    	for(int i = 1; i <=linenumber; i++)
+    	  br.readLine();
+    	content = br.readLine();
+    	return content;
     }
     private static void GetUserInfo(BoxAPIConnection api) throws IOException{
     	BoxUser.Info userInfo = BoxUser.getCurrentUser(api).getInfo();
