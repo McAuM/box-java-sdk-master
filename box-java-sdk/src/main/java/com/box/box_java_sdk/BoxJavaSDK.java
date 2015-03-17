@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,64 +22,68 @@ import com.box.sdk.Metadata;
 import com.box.sdk.ProgressListener;
 
 public final class BoxJavaSDK {
-    /*private static final String CLIENT_ID1 = "qs9oulna0fakkkxjorbvc0bpv8113423";
+  /*  private static final String CLIENT_ID1 = "qs9oulna0fakkkxjorbvc0bpv8113423";
     private static final String CLIENT_SECRET1 = "tAtjbtmbkIp5n6vQsWBeX1SyOoYVq66M";
     private static final String CLIENT_ID2 = "awpbu85jgxxhfeybsqygf6qqxtn5dbs1";
     private static final String CLIENT_SECRET2 = "VhTpmy4VMhCgyuhm302xYuIwxb6xMZML";*/  
     private static final int MAX_DEPTH = 2;
+    private static String Path_id=""; 
     private BoxJavaSDK() { }
     public static void main(String[] args) throws IOException {
     	String arg2 = args[1];
     	String arg1 = args[0];
-    	int NoBox = Integer.parseInt(arg1);
+    	int NoBox = Integer.parseInt(arg2);
     	String ClientID = Readfilenumber("/home/hadoop/TESAPI/TESTSCRIPT/cliID.box",NoBox-1);
     	String ClientSecret = Readfilenumber("/home/hadoop/TESAPI/TESTSCRIPT/cliSECRET.box",NoBox-1);    	
-    	String DEVELOPER_TOKEN = (String)Readfile("/home/hadoop/TESAPI/TESTSCRIPT/token.box"+arg1);
-    	String REFRESH_TOKEN = (String)Readfile("/home/hadoop/TESAPI/TESTSCRIPT/refreshtoken.box"+arg1);
+    	String DEVELOPER_TOKEN = (String)Readfile("/home/hadoop/TESAPI/TESTSCRIPT/token.box"+arg2);
+    	String REFRESH_TOKEN = (String)Readfile("/home/hadoop/TESAPI/TESTSCRIPT/refreshtoken.box"+arg2);
+    	//String DEVELOPER_TOKEN = "PXBFLeUmuu6Xr9rHomHxmzY0ITJnD9xN";
+    	//String REFRESH_TOKEN = "znG9URUDDOJ0kWkYgcxw3IGx1cwbo3wDUrILRhEMrqL93hLCDTyaeBn1lNET20Pz";
         Logger.getLogger("com.box.sdk").setLevel(Level.OFF); // Turn off logging to prevent polluting the output.        
         BoxAPIConnection api = new BoxAPIConnection(ClientID.trim(),ClientSecret.trim(),DEVELOPER_TOKEN.trim(),REFRESH_TOKEN.trim());                       
         if(arg2.equals("help")){
         	HelpApi();
         }
-        else if(arg2.equals("account")){
+        else if(arg1.equals("account")){
         	GetUserInfo(api);
         }
-        else if(arg2.equals("space")){
+        else if(arg1.equals("space")){
         	space(api);
         }
-        else if(arg2.equals("spaceper")){
+        else if(arg1.equals("spaceper")){
         	spaceper(api);
         }
-        else if(arg2.equals("listingAll")){
+        else if(arg1.equals("listingAll")){
         	BoxFolder rootFolder = BoxFolder.getRootFolder(api);
         	listFolder(rootFolder,0);
         }
-        else if(arg2.equals("listing")){ 
-        	String arg3 = args[2];
-        	listing(api,arg3);
-        }
-        else if(arg2.equals("deletefile")){		
+
+        else if(arg1.equals("deletefile")){		
 			String arg3 = args[2];
 			DeleteFile(api,arg3);
 		}
-        else if(arg2.equals("deletedir")){			
-			String arg3 = args[2];
-			DeleteFolder(api,arg3);
-		}
-        else if(arg2.equals("metadatafile")){		
+        else if(arg1.equals("metadatafile")){		
 			String arg3 = args[2];
 			GetInfo(api,arg3);
 		}
-        else if(arg2.equals("metadatadir")){		
-		   	
+        else if(arg1.equals("metadatadir")){
+        	BoxFolder rootFolder = BoxFolder.getRootFolder(api);
+		   	String arg3 = args[2];
+		   	listFolder2(rootFolder, 0, arg3);
 		}
-        else if(arg2.equals("download")){		
+        else if(arg1.equals("download")){		
 			String arg3 = args[2];
-			DownloadFile(api, arg3);
+			String arg4 = args[3];
+			DownloadFile(api, arg3,arg4);
 		}
-        else if(arg2.equals("upload")){		
+        else if(arg1.equals("upload")){        	
 			String arg3 = args[2];
-			UploadFile(api, arg3);
+			UploadFile(api, arg3);			
+		}
+        else if(arg1.equals("rename")){		
+			String arg3 = args[2];
+			String arg4 = args[3];
+			Rename(api, arg3,arg4);
 		}
 		else System.out.println("Commnad Error");
     }
@@ -151,25 +156,35 @@ public final class BoxJavaSDK {
     	long percents = use/total*100;    	
     	System.out.println(percents);
     }
-    private static void DownloadFile(BoxAPIConnection api,String id) throws IOException{
+    private static void DownloadFile(BoxAPIConnection api,String id,String path) throws IOException{    	
     	BoxFile file = new BoxFile(api, id);
     	BoxFile.Info info = file.getInfo();    	
-    	FileOutputStream stream = new FileOutputStream(info.getName());
+    	FileOutputStream stream = new FileOutputStream(path+info.getName().replaceAll("!", "/").trim());
     	file.download(stream);
-    	//System.out.println("Download Complete : "+info.getName());
-    	stream.close();
+    	System.out.println("Download file Completed to "+path+info.getName().replaceAll("!", "/"));
+    	stream.close();    	
     }
     private static void UploadFile(BoxAPIConnection api,String Path) throws IOException{
     	BoxFolder rootFolder = BoxFolder.getRootFolder(api);
     	FileInputStream stream = new FileInputStream(Path);
     	rootFolder.uploadFile(stream, Path);    	
+    	String fileName = Path.substring(Path.lastIndexOf("/")+1);    	
+    	listFolder2(rootFolder,0,fileName);    	
+    	System.out.println("Upload file Completed "+fileName+" "+ Path_id);    	
+    	Rename(api,(String)Path.replaceAll("/", "!").trim(),Path_id);    				
     	stream.close();
-    	//System.out.println("Upload Complete");
+    }
+    private static void Rename(BoxAPIConnection api,String Path,String id) throws IOException{
+    	BoxFile file = new BoxFile(api, id);
+    	BoxFile.Info info = file.new Info();
+    	info.setName(Path);
+    	file.updateInfo(info);
     }
     private static void DeleteFile(BoxAPIConnection api,String id) throws IOException{
     	BoxFile file = new BoxFile(api, id);
+    	BoxFile.Info info = file.getInfo();
     	file.delete();
-    	//System.out.println("Delete Complete: "+file.getInfo().getName());
+    	System.out.println("Delete Complete: "+info.getName());
     }
     private static void GetInfo(BoxAPIConnection api,String id) throws IOException{
     	BoxFile file = new BoxFile(api, id);
@@ -191,16 +206,18 @@ public final class BoxJavaSDK {
             }
         }
     }
-    private static void DeleteFolder(BoxAPIConnection api,String id) throws IOException{
-    	BoxFolder folder = new BoxFolder(api, id);
-    	folder.delete(true);
+    private static void listFolder2(BoxFolder folder, int depth,String file) {
+        for (BoxItem.Info itemInfo : folder) {                        
+            if(itemInfo.getName().equals(file)) {Path_id=itemInfo.getID();break;}            
+            if (itemInfo instanceof BoxFolder.Info) {
+                BoxFolder childFolder = (BoxFolder) itemInfo.getResource();
+                if (depth < MAX_DEPTH) {
+                    listFolder2(childFolder, depth + 1, file);
+                }
+            }
+        }       
     }
-    private static void listing(BoxAPIConnection api,String search) throws IOException{
-    	BoxFolder rootFolder = BoxFolder.getRootFolder(api);
-    	Iterable<BoxItem.Info> results = rootFolder.search(search);
-    	for (BoxItem.Info result : results) {
-    	    System.out.println(result.getID());
-    	}
-    }
-    
+
+
+
 }
