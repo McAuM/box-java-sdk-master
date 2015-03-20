@@ -41,7 +41,7 @@ public final class BoxJavaSDK {
     	//String REFRESH_TOKEN = "znG9URUDDOJ0kWkYgcxw3IGx1cwbo3wDUrILRhEMrqL93hLCDTyaeBn1lNET20Pz";
         Logger.getLogger("com.box.sdk").setLevel(Level.OFF); // Turn off logging to prevent polluting the output.        
         BoxAPIConnection api = new BoxAPIConnection(ClientID.trim(),ClientSecret.trim(),DEVELOPER_TOKEN.trim(),REFRESH_TOKEN.trim());                       
-        if(arg2.equals("help")){
+        if(arg1.equals("help")){
         	HelpApi();
         }
         else if(arg1.equals("account")){
@@ -98,16 +98,15 @@ public final class BoxJavaSDK {
     	System.out.println("------------------------------------------------------");
     	System.out.println("Usage Commnad-line");
     	System.out.println("Commmand <need> [option] {detail}");
-    	System.out.println("- help			{Show more informaion command}");
-    	System.out.println("- account		{Show account informaion }");
-    	System.out.println("- space			{Show space informaion }");
-    	System.out.println("- spaceper		{Show space in percent }");
-    	System.out.println("- listingAll		{Show all file and Directory}");
-    	System.out.println("- deletefile		<id> {Delete file with id}");
-    	System.out.println("- deletedir		<id> {Delete folder with id}");    	
-    	System.out.println("- metadatafile		<id> {Show file information with id}");    	
-    	System.out.println("- download		<id> {Download file with id}");
-    	System.out.println("- upload		<filename> {Upload file with from filename}");    	
+    	System.out.println("- help			<No.account>{Show more informaion command}");
+    	System.out.println("- account		<No.account>{Show account informaion }");
+    	System.out.println("- space			<No.account>{Show space informaion }");
+    	System.out.println("- spaceper		<No.account>{Show space in percent }");
+    	System.out.println("- listingAll		<No.account>{Show all file and Directory}");
+    	System.out.println("- deletefile		<No.account> <id> {Delete file with id}");    	  
+    	System.out.println("- metadatafile		<No.account> <id> {Show file information with id}");    	
+    	System.out.println("- download		<No.account> <id> {Download file with id}");
+    	System.out.println("- upload		<No.account> <Path> {Upload file with from Path}");    	
     }
     private static String Readfile(String ChFile) throws IOException{    	
     	String content = null;    
