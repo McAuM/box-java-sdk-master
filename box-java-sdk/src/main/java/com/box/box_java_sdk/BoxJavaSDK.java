@@ -78,7 +78,8 @@ public final class BoxJavaSDK {
 		}
         else if(arg1.equals("upload")){        	
 			String arg3 = args[2];
-			UploadFile(api, arg3);			
+			String arg4 = args[3];
+			UploadFile(api, arg3 ,arg4);			
 		}
         else if(arg1.equals("rename")){		
 			String arg3 = args[2];
@@ -106,7 +107,7 @@ public final class BoxJavaSDK {
     	System.out.println("- deletefile		<No.account> <id> {Delete file with id}");    	  
     	System.out.println("- metadatafile		<No.account> <id> {Show file information with id}");    	
     	System.out.println("- download		<No.account> <id> {Download file with id}");
-    	System.out.println("- upload		<No.account> <Path> {Upload file with from Path}");    	
+    	System.out.println("- upload		<No.account> <Path1> <Path2> {Upload file with from Path1 to Path2}");    	
     }
     private static String Readfile(String ChFile) throws IOException{    	
     	String content = null;    
@@ -143,10 +144,10 @@ public final class BoxJavaSDK {
     }
     private static void space(BoxAPIConnection api) throws IOException{
     	BoxUser.Info userInfo = BoxUser.getCurrentUser(api).getInfo();
-    	System.out.println("User space");
-    	System.out.format("total = %d Gb\n",userInfo.getSpaceAmount()/1073741824);
-    	System.out.format("used = %d Gb\n",userInfo.getSpaceUsed()/1073741824);
-    	System.out.format("free = %d Gb\n",(userInfo.getSpaceAmount()/1073741824)-(userInfo.getSpaceUsed()/1073741824));
+    	System.out.println("User space");    	
+    	System.out.format("total = %d Gb or %d Mb\n",userInfo.getSpaceAmount()/1073741824,userInfo.getSpaceAmount()/1048576);
+    	System.out.format("used = %d Gb or %d Mb\n",userInfo.getSpaceUsed()/1073741824,userInfo.getSpaceUsed()/1048576);
+    	System.out.format("free = %d Gb or %d Mb\n",(userInfo.getSpaceAmount()/1073741824)-(userInfo.getSpaceUsed()/1073741824),(userInfo.getSpaceAmount()/1048576)-(userInfo.getSpaceUsed()/1048576));
     }
     private static void spaceper(BoxAPIConnection api) throws IOException{
     	BoxUser.Info userInfo = BoxUser.getCurrentUser(api).getInfo();
@@ -163,14 +164,14 @@ public final class BoxJavaSDK {
     	System.out.println("Download file Completed to "+path+info.getName().replaceAll("!", "/"));
     	stream.close();    	
     }
-    private static void UploadFile(BoxAPIConnection api,String Path) throws IOException{
+    private static void UploadFile(BoxAPIConnection api,String Path , String newPath) throws IOException{
     	BoxFolder rootFolder = BoxFolder.getRootFolder(api);
     	FileInputStream stream = new FileInputStream(Path);
     	rootFolder.uploadFile(stream, Path);    	
     	String fileName = Path.substring(Path.lastIndexOf("/")+1);    	
     	listFolder2(rootFolder,0,fileName);    	
     	System.out.println("Upload file Completed "+fileName+" "+ Path_id);    	
-    	Rename(api,(String)Path.replaceAll("/", "!").trim(),Path_id);    				
+    	Rename(api,(String)newPath.replaceAll("/", "!").trim(),Path_id);    				
     	stream.close();
     }
     private static void Rename(BoxAPIConnection api,String Path,String id) throws IOException{
