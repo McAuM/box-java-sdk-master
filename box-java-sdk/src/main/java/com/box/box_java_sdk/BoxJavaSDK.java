@@ -62,7 +62,7 @@ public final class BoxJavaSDK {
 			String arg3 = args[2];
 			DeleteFile(api,arg3);
 		}
-        else if(arg1.equals("metadatafile")){		
+        else if(arg1.equals("metadata")){		
 			String arg3 = args[2];
 			GetInfo(api,arg3);
 		}
@@ -75,6 +75,11 @@ public final class BoxJavaSDK {
 			String arg3 = args[2];
 			String arg4 = args[3];
 			DownloadFile(api, arg3,arg4);
+		}
+        else if(arg1.equals("download2")){		
+			String arg3 = args[2];
+			String arg4 = args[3];
+			DownloadFile2(api, arg3,arg4);
 		}
         else if(arg1.equals("upload")){        	
 			String arg3 = args[2];
@@ -164,6 +169,16 @@ public final class BoxJavaSDK {
     	System.out.println("Download file Completed to "+path+info.getName().replaceAll("!", "/"));
     	stream.close();    	
     }
+    private static void DownloadFile2(BoxAPIConnection api,String id,String path) throws IOException{      	 
+    	BoxFile file = new BoxFile(api, id);
+    	BoxFile.Info info = file.getInfo();
+    	String Name = info.getName().replaceAll("!", "/").trim();
+    	String fileName = Name.substring(Name.lastIndexOf("/")+1);
+    	FileOutputStream stream = new FileOutputStream(path+fileName);
+    	file.download(stream);
+    	System.out.println("Download file Completed to "+path+" "+Name);
+    	stream.close();    	
+    }
     private static void UploadFile(BoxAPIConnection api,String Path , String newPath) throws IOException{
     	BoxFolder rootFolder = BoxFolder.getRootFolder(api);
     	FileInputStream stream = new FileInputStream(Path);
@@ -189,7 +204,9 @@ public final class BoxJavaSDK {
     private static void GetInfo(BoxAPIConnection api,String id) throws IOException{
     	BoxFile file = new BoxFile(api, id);
     	BoxFile.Info info = file.getInfo();
-    	System.out.println(info.getName()+" "+info.getSize());    	
+    	System.out.println("Title: " + info.getName());             
+        System.out.println("Size: " + info.getSize() + " btye");
+        System.out.println("Date: " + info.getCreatedAt());    	    
     }
     private static void listFolder(BoxFolder folder, int depth) {
         for (BoxItem.Info itemInfo : folder) {
