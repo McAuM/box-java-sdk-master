@@ -1,10 +1,12 @@
 package com.box.box_java_sdk;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -91,6 +93,9 @@ public final class BoxJavaSDK {
 			String arg4 = args[3];
 			Rename(api, arg3,arg4);
 		}
+        else if(arg1.equals("addaccount")){		
+			Addaccount();
+		}
 		else System.out.println("Commnad Error");
     }
     private static void HelpApi() throws IOException{
@@ -105,6 +110,7 @@ public final class BoxJavaSDK {
     	System.out.println("Usage Commnad-line");
     	System.out.println("Commmand <need> [option] {detail}");
     	System.out.println("- help			<No.account>{Show more informaion command}");
+    	System.out.println("- addaccount			<No.account>{Show more informaion command}");
     	System.out.println("- account		<No.account>{Show account informaion }");
     	System.out.println("- space			<No.account>{Show space informaion }");
     	System.out.println("- spaceper		<No.account>{Show space in percent }");
@@ -113,6 +119,50 @@ public final class BoxJavaSDK {
     	System.out.println("- metadata		<No.account> <id> {Show file information with id}");    	
     	System.out.println("- download		<No.account> <id> {Download file with id}");
     	System.out.println("- upload		<No.account> <Path1> <Path2> {Upload file with from Path1 to Path2}");    	
+    }
+    private static void Addaccount() throws IOException{
+    	System.out.print("Enter the Client ID: ");
+    	String CliID = new BufferedReader(new InputStreamReader(System.in)).readLine();
+    	System.out.print("Enter the Client Secret: ");
+    	String Clisecret = new BufferedReader(new InputStreamReader(System.in)).readLine();
+    	CliID = CliID.trim();
+    	Clisecret = Clisecret.trim();
+    	System.out.println("Following the Instruction");
+    	System.out.println("1. Goto Url :");
+    	System.out.println("https://app.box.com/api/oauth2/authorize?response_type=code&client_id="+CliID+"&state=security_token%3DKnhMJatFipTAnM0nHlZA");
+    	System.out.println("2. Enter Username and Password");
+    	System.out.println("3. Click Grant Access Box");
+    	System.out.println("4. Get code in url");
+    	System.out.print("5. Enter Authorization code: ");    	
+    	String Authorizationcode = new BufferedReader(new InputStreamReader(System.in)).readLine();
+    	BoxAPIConnection api = new BoxAPIConnection(CliID,Clisecret,Authorizationcode);
+    	String Accestoken=api.getAccessToken();
+    	String Refreshtoken=api.getRefreshToken();
+    	//System.out.println("Accestoken "+ Accestoken);
+    	//System.out.println("Refreshtoken "+ Refreshtoken);
+    	BufferedReader read = new BufferedReader(new FileReader("/home/hadoop/TESAPI/TESTSCRIPT/active_Box.txt"));
+    	String line = read.readLine();
+    	String[] tmpArray = line.split(" ");
+    	int count = tmpArray.length;
+    	count = count +1;
+    	read.close();
+    	File file_Accestoken =new File("/home/hadoop/TESAPI/TESTSCRIPT/Box/token.box"+count);
+    	File file_Refreshtoken =new File("/home/hadoop/TESAPI/TESTSCRIPT/Box/refreshtoken.box"+count);
+    	File file_CliID =new File("/home/hadoop/TESAPI/TESTSCRIPT/Box/cliID.box");
+    	File file_Clisecret =new File("/home/hadoop/TESAPI/TESTSCRIPT/Box/cliSECRET.box");
+    	BufferedWriter output = new BufferedWriter(new FileWriter(file_CliID,true));
+        output.write(CliID);
+        output.close();
+        output = new BufferedWriter(new FileWriter(file_Clisecret,true));
+        output.write(Clisecret);
+        output.close();
+        output = new BufferedWriter(new FileWriter(file_Accestoken));
+        output.write(Accestoken);
+        output.close();
+        output = new BufferedWriter(new FileWriter(file_Refreshtoken));
+        output.write(Refreshtoken);
+        output.close();
+        System.out.println("Complete...");
     }
     private static String Readfile(String ChFile) throws IOException{    	
     	String content = null;    
