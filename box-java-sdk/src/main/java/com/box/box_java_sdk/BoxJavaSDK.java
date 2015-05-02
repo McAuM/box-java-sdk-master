@@ -49,8 +49,14 @@ public final class BoxJavaSDK {
         else if(arg1.equals("account")){
         	GetUserInfo(api);
         }
+        else if(arg1.equals("account2")){
+        	GetUserInfo2(api);
+        }
         else if(arg1.equals("space")){
         	space(api);
+        }
+        else if(arg1.equals("space2")){
+        	space2(api);
         }
         else if(arg1.equals("spaceper")){
         	spaceper(api);
@@ -59,7 +65,10 @@ public final class BoxJavaSDK {
         	BoxFolder rootFolder = BoxFolder.getRootFolder(api);
         	listFolder(rootFolder,0);
         }
-
+        else if(arg1.equals("listingAll2")){
+        	BoxFolder rootFolder = BoxFolder.getRootFolder(api);
+        	listFolder3(rootFolder,0);
+        }
         else if(arg1.equals("delete")){		
 			String arg3 = args[2];
 			DeleteFile(api,arg3);
@@ -110,14 +119,14 @@ public final class BoxJavaSDK {
     	System.out.println("Usage Commnad-line");
     	System.out.println("Commmand <need> [option] {detail}");
     	System.out.println("- help			<No.account>{Show more informaion command}");
-    	System.out.println("- addaccount			<No.account>{Show more informaion command}");
+    	System.out.println("- addaccount		<No.account>{add Account}");
     	System.out.println("- account		<No.account>{Show account informaion }");
     	System.out.println("- space			<No.account>{Show space informaion }");
     	System.out.println("- spaceper		<No.account>{Show space in percent }");
     	System.out.println("- listingAll		<No.account>{Show all file and Directory}");
     	System.out.println("- delete		<No.account> <id> {Delete file with id}");    	  
     	System.out.println("- metadata		<No.account> <id> {Show file information with id}");    	
-    	System.out.println("- download		<No.account> <id> {Download file with id}");
+    	System.out.println("- download		<No.account> <id> <Path> {Download file with id to Path}");
     	System.out.println("- upload		<No.account> <Path1> <Path2> {Upload file with from Path1 to Path2}");    	
     }
     private static void Addaccount() throws IOException{
@@ -197,12 +206,24 @@ public final class BoxJavaSDK {
     	System.out.format("used = %d Gb\n",userInfo.getSpaceUsed()/1073741824);
     	System.out.format("free = %d Gb\n",(userInfo.getSpaceAmount()/1073741824)-(userInfo.getSpaceUsed()/1073741824));
     }
+    private static void GetUserInfo2(BoxAPIConnection api) throws IOException{
+    	BoxUser.Info userInfo = BoxUser.getCurrentUser(api).getInfo();    	
+    	System.out.format("user id = %s\t", userInfo.getID());
+    	System.out.format("display name = %s\n", userInfo.getName());    	    
+    }
     private static void space(BoxAPIConnection api) throws IOException{
     	BoxUser.Info userInfo = BoxUser.getCurrentUser(api).getInfo();
     	System.out.println("User space");    	
     	System.out.format("total = %d Gb or %d Mb\n",userInfo.getSpaceAmount()/1073741824,userInfo.getSpaceAmount()/1048576);
     	System.out.format("used = %d Gb or %d Mb\n",userInfo.getSpaceUsed()/1073741824,userInfo.getSpaceUsed()/1048576);
     	System.out.format("free = %d Gb or %d Mb\n",(userInfo.getSpaceAmount()/1073741824)-(userInfo.getSpaceUsed()/1073741824),(userInfo.getSpaceAmount()/1048576)-(userInfo.getSpaceUsed()/1048576));
+    }
+    private static void space2(BoxAPIConnection api) throws IOException{
+    	BoxUser.Info userInfo = BoxUser.getCurrentUser(api).getInfo();
+    	System.out.println("User space");    	
+    	System.out.format("total = %d Mb\t",userInfo.getSpaceAmount()/1048576);
+    	System.out.format("used = %d Mb\t",userInfo.getSpaceUsed()/1048576);
+    	System.out.format("free = %d Mb\n",(userInfo.getSpaceAmount()/1048576)-(userInfo.getSpaceUsed()/1048576));
     }
     private static void spaceper(BoxAPIConnection api) throws IOException{
     	BoxUser.Info userInfo = BoxUser.getCurrentUser(api).getInfo();
@@ -269,6 +290,21 @@ public final class BoxJavaSDK {
                 BoxFolder childFolder = (BoxFolder) itemInfo.getResource();
                 if (depth < MAX_DEPTH) {
                     listFolder(childFolder, depth + 1);
+                }
+            }
+        }
+    }
+    private static void listFolder3(BoxFolder folder, int depth) {
+        for (BoxItem.Info itemInfo : folder) {
+            String indent = "";
+            for (int i = 0; i < depth; i++) {
+                indent += "    ";
+            }            
+            System.out.println(itemInfo.getName());
+            if (itemInfo instanceof BoxFolder.Info) {
+                BoxFolder childFolder = (BoxFolder) itemInfo.getResource();
+                if (depth < MAX_DEPTH) {
+                    listFolder3(childFolder, depth + 1);
                 }
             }
         }
